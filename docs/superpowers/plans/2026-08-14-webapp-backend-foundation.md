@@ -51,7 +51,7 @@ webapp/
       tokens.ts           -- HMAC email-token sign/verify
       linkSig.ts           -- HMAC per-link signature sign/verify
       supabaseAdmin.ts     -- server-only Supabase client (service role)
-      pixel.ts             -- the 43-byte transparent GIF buffer + response headers
+      pixel.ts             -- the 42-byte transparent GIF buffer + response headers
     app/
       api/
         sent/

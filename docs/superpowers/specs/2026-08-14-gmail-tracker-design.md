@@ -108,7 +108,7 @@ place with real test coverage in the project, per the working style below.
   URL can enumerate the owner's send history.
 - The click redirect (`/c/[token]/[i]`) validates the destination against the signed,
   stored `links` row. Anything not `http`/`https` is rejected. No open redirect.
-- Pixel response: 43-byte transparent GIF, `Cache-Control: no-store, no-cache,
+- Pixel response: 42-byte transparent GIF, `Cache-Control: no-store, no-cache,
   must-revalidate, private`.
 
 ## Gmail DOM integration
