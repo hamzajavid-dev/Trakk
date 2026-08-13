@@ -44,4 +44,9 @@ describe("isSafeRedirectUrl", () => {
     expect(isSafeRedirectUrl("not a url")).toBe(false);
     expect(isSafeRedirectUrl("")).toBe(false);
   });
+
+  it("rejects protocol-relative and path-relative urls", () => {
+    expect(isSafeRedirectUrl("//evil.com")).toBe(false);
+    expect(isSafeRedirectUrl("/foo")).toBe(false);
+  });
 });
