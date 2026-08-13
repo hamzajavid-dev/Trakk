@@ -243,7 +243,7 @@ route handlers heavily), watch for regressing these:
 
 ---
 
-## 4. Session 2 — NOT STARTED — Accuracy layer (build and test BEFORE any UI)
+## 4. Session 2 — IMPLEMENTED LOCALLY — Accuracy layer (manual gate pending)
 
 **This is the most important remaining session.** Per the spec: "Without this the
 tool reports 100% opens and is worthless." Read the spec's "Accuracy layer" section
@@ -317,13 +317,27 @@ functions like `tokens.ts`/`linkSig.ts`/`hash.ts`).
 - View your own sent copy in Gmail's Sent folder → **0** opens logged (self-open
   suppressed).
 
-### Before starting Session 2
+### Implementation completed in this session
 
-Run `superpowers:brainstorming` again for this session specifically — it has a real
-open design question (the heartbeat endpoint / self-open storage) that wasn't fully
-speced in the original design doc and deserves a quick user check-in before writing
-the implementation plan. Everything else in Session 2 is well-specified enough to go
-straight to `writing-plans` after that one question is resolved.
+- Added test-first request fixtures and accuracy classification tests for Gmail's
+  image proxy, Apple Mail privacy traffic, and a normal browser.
+- Added `src/lib/accuracy.ts`, which identifies Google proxy requests by UA or known
+  IPv4 ranges; delivery-time proxy requests become `prefetch`, later proxy renders
+  remain lower-confidence opens, and Apple Mail signals are low confidence.
+- Reworked `logEvent` to load `sent_at`/`tracking_enabled`, look up a recent
+  heartbeat, deduplicate pixel events over three minutes, and store the real
+  `type`, `is_proxy`, `is_self`, and `confidence` values via `after()`.
+- Chose a dedicated `heartbeats(ip_hash, seen_at)` table rather than synthetic events.
+  `POST /api/heartbeat` is extension-secret protected, records the request source IP
+  after hashing it, and upserts its last-seen time. No raw IP is stored.
+- Added `GET /api/noop`, which returns the transparent GIF without tracking, ready for
+  the Session 4 declarative-net-request self-open rule.
+- Added `0002_accuracy_layer.sql`. It must be applied to the live Supabase project
+  before deployment; Session 2 cannot complete its live manual gate until then and
+  until the Session 4 extension sends its heartbeat.
+- `npm test` (23 tests), `npx tsc --noEmit`, and `npm run build` all pass. Local HTTP
+  checks confirm `/api/noop` returns the 42-byte GIF, unauthorized heartbeat returns
+  `401`, and a literal `null` body to authenticated `/api/sent` returns `400`.
 
 ---
 

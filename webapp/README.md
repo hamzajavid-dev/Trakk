@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Trakk webapp
 
-## Getting Started
+The Next.js backend for a single-owner Gmail open and link-click tracker. It issues
+HMAC-signed tracking URLs, logs public pixel and redirect requests in Supabase, and
+applies the accuracy rules before any dashboard is built.
 
-First, run the development server:
+## Run locally
 
 ```bash
+npm install
+npm test
+npx tsc --noEmit
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Copy `.env.local.example` to `.env.local` and set:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+SUPABASE_URL
+SUPABASE_SERVICE_ROLE_KEY
+TOKEN_SECRET
+LINK_SIG_SECRET
+EXTENSION_SHARED_SECRET
+APP_BASE_URL
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`APP_BASE_URL` must be the public HTTPS application URL in production. Service-role
+credentials are server-only and must never be included in the extension.
 
-## Learn More
+## Database migrations
 
-To learn more about Next.js, take a look at the following resources:
+`supabase/migrations/0001_init.sql` creates the tracker schema. Apply
+`supabase/migrations/0002_accuracy_layer.sql` to add the hashed-IP heartbeat store
+before deploying this version. The table is RLS-protected; only the server's service
+role accesses it.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Accuracy behavior
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Gmail proxy requests inside 90 seconds of send are recorded as `prefetch` with
+  confidence `0`, never as a counted open.
+- Events with the same email, IP hash, and user-agent hash are collapsed within a
+  rolling three-minute window.
+- The extension can `POST /api/heartbeat` with its bearer secret. The server hashes
+  the request's source IP and marks matching events from the past 24 hours as
+  `is_self`, with confidence `0`.
+- Apple Mail privacy signals are retained as low-confidence raw events. Raw events
+  are never deleted by the accuracy layer.
+- Disabling `emails.tracking_enabled` now prevents all event logging for that email.
 
-## Deploy on Vercel
+## API contracts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`POST /api/sent` requires `Authorization: Bearer <EXTENSION_SHARED_SECRET>` and
+accepts `{ threadId, subject, recipientCount, links }`. It returns a pixel URL and
+rewritten click URLs.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`POST /api/heartbeat` requires the same authorization and no request body. It
+returns `204` when the source-IP heartbeat is stored.
+
+`GET /api/noop` returns the transparent tracking GIF without logging an event. The
+future extension uses it as the safe redirect target for its self-open blocking rule.
+
+`GET /p/[token]` always returns the tracking GIF. `GET /c/[token]/[i]` validates its
+HMAC-signed stored link and redirects only to an `http` or `https` destination.

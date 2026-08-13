@@ -5,6 +5,7 @@ import { hashWithSecret } from "@/lib/hash";
 import { isSafeRedirectUrl, signLink } from "@/lib/linkSig";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { requireEnv } from "@/lib/env";
+import { isExtensionAuthorized } from "@/lib/extensionAuth";
 
 interface SentBody {
   threadId: string;
@@ -13,19 +14,13 @@ interface SentBody {
   links: string[];
 }
 
-function isAuthorized(req: NextRequest): boolean {
-  const header = req.headers.get("authorization") ?? "";
-  const expected = `Bearer ${process.env.EXTENSION_SHARED_SECRET}`;
-  return header === expected;
-}
-
 export async function POST(req: NextRequest) {
-  requireEnv("EXTENSION_SHARED_SECRET");
+  const extensionSecret = requireEnv("EXTENSION_SHARED_SECRET");
   const tokenSecret = requireEnv("TOKEN_SECRET");
   const linkSigSecret = requireEnv("LINK_SIG_SECRET");
   const baseUrl = requireEnv("APP_BASE_URL");
 
-  if (!isAuthorized(req)) {
+  if (!isExtensionAuthorized(req, extensionSecret)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
@@ -36,7 +31,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalid JSON body" }, { status: 400 });
   }
 
-  if (!body.threadId || !body.subject || !Array.isArray(body.links)) {
+  if (!body || typeof body !== "object" || !body.threadId || !body.subject || !Array.isArray(body.links)) {
     return NextResponse.json({ error: "invalid body" }, { status: 400 });
   }
   if (
