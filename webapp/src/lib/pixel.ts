@@ -1,4 +1,4 @@
-// 1x1 transparent GIF, 43 bytes.
+// 1x1 transparent GIF, 42 bytes.
 export const PIXEL_GIF = Buffer.from(
   "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBTAA7",
   "base64",
