@@ -1,8 +1,8 @@
 # Trakk webapp
 
-The Next.js backend for a single-owner Gmail open and link-click tracker. It issues
-HMAC-signed tracking URLs, logs public pixel and redirect requests in Supabase, and
-applies the accuracy rules before any dashboard is built.
+The Next.js backend and dashboard for a single-owner Gmail open and link-click
+tracker. It issues HMAC-signed tracking URLs, classifies tracking accuracy signals,
+and provides the owner-only dashboard used with `../extension`.
 
 ## Run locally
 
@@ -18,14 +18,18 @@ Copy `.env.local.example` to `.env.local` and set:
 ```text
 SUPABASE_URL
 SUPABASE_SERVICE_ROLE_KEY
+SUPABASE_ANON_KEY
+DASHBOARD_OWNER_EMAIL
 TOKEN_SECRET
 LINK_SIG_SECRET
 EXTENSION_SHARED_SECRET
 APP_BASE_URL
 ```
 
-`APP_BASE_URL` must be the public HTTPS application URL in production. Service-role
-credentials are server-only and must never be included in the extension.
+`APP_BASE_URL` must be the public HTTPS application URL in production. Set
+`DASHBOARD_OWNER_EMAIL` to the exact email of the one Supabase Auth user allowed to
+sign in at `/login`. Service-role credentials are server-only and must never be
+included in the extension.
 
 ## Database migrations
 
@@ -57,7 +61,17 @@ rewritten click URLs.
 returns `204` when the source-IP heartbeat is stored.
 
 `GET /api/noop` returns the transparent tracking GIF without logging an event. The
-future extension uses it as the safe redirect target for its self-open blocking rule.
+extension uses it as the safe redirect target for its self-open blocking rule.
+
+`GET /api/status?threadIds=<comma-separated-gmail-thread-ids>` requires the extension
+bearer secret and returns at most 100 batch thread states. It is intentionally for
+the extension only; the dashboard reads richer data server-side.
 
 `GET /p/[token]` always returns the tracking GIF. `GET /c/[token]/[i]` validates its
 HMAC-signed stored link and redirects only to an `http` or `https` destination.
+
+## Dashboard
+
+Visit `/login` to access the responsive owner dashboard. It includes current activity,
+open and click counts, a compact opens chart, searchable sent emails, per-link detail,
+confidence labels, tracking controls, and raw-event deletion.

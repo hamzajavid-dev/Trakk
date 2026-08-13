@@ -1,69 +1,40 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.tsx</code> file.
-          </h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="marketing-shell">
+      <nav className="marketing-nav">
+        <Link href="/" className="brand" aria-label="Trakk home">
+          <span className="brand-mark">T</span>
+          <span>trakk</span>
+        </Link>
+        <Link href="/login" className="button button-secondary">Owner sign in</Link>
+      </nav>
+
+      <section className="hero">
+        <div className="eyebrow"><span className="live-dot" /> Gmail tracking, with receipts</div>
+        <h1>Every sent email.<br /><em>Made visible.</em></h1>
+        <p>Trakk turns quiet Gmail sends into a clear signal: opens, clicks, confidence, and the story behind every interaction.</p>
+        <div className="hero-actions">
+          <Link href="/login" className="button button-primary">Open dashboard <span aria-hidden>→</span></Link>
+          <a href="#how-it-works" className="text-link">How it works <span aria-hidden>↓</span></a>
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      <section className="signal-card" aria-label="Tracking dashboard preview">
+        <div className="signal-topline"><span>Live activity</span><span className="status-pill">● Updating</span></div>
+        <div className="signal-grid">
+          <div><span className="metric-label">Open rate</span><strong>64<span>%</span></strong><small>↑ 12% this week</small></div>
+          <div><span className="metric-label">Link clicks</span><strong>38</strong><small>Across 12 conversations</small></div>
+          <div className="signal-bars" aria-hidden="true"><i /><i /><i /><i /><i /><i /><i /></div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      <section id="how-it-works" className="feature-strip">
+        <div><span>01</span><h2>Send as usual</h2><p>Your Gmail workflow stays exactly where it is.</p></div>
+        <div><span>02</span><h2>Read the signal</h2><p>Events are classified so proxy noise doesn’t pretend to be intent.</p></div>
+        <div><span>03</span><h2>Follow through</h2><p>Open the exact email and see every meaningful moment.</p></div>
+      </section>
+    </main>
   );
 }
