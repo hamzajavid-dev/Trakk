@@ -130,7 +130,12 @@ Gmail is a SPA that recycles DOM nodes constantly.
 
 **Dashboard (`webapp/`, behind Supabase Auth login) — this is where the design goes
 beyond the original plain-HTML `/stats` page, since Next.js is now the whole backend
-anyway:**
+anyway. Visual/feature reference: Mailsuite's home screen (activity feed + performance
+stats) — same idea, single-user, no team features:**
+- Home: a "Latest Activity" feed (most recent opens/clicks, newest first, "2nd time"
+  labels for repeat events) and a "My performance" panel — sent emails, opening rate
+  (opened/sent), average time-to-open — computed from `events`/`emails`, no separate
+  analytics store.
 - Sent list: sortable/filterable by status, date, subject.
 - Email detail view: open timeline, click timeline, per-link breakdown, confidence
   badges, and the raw event log for that email.
