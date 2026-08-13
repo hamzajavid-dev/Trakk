@@ -1,0 +1,20 @@
+{
+  "name": "trakk-extension",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "@inboxsdk/core": "^2.2.19"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^2.7.1",
+    "@types/chrome": "^0.1.42",
+    "typescript": "^5.9.3",
+    "vite": "^8.2.1"
+  }
+}

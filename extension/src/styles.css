@@ -1,0 +1,25 @@
+.trakk-status-badge {
+  color: #6b9c86;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -2px;
+  margin-left: 8px;
+  white-space: nowrap;
+}
+
+.trakk-status-badge--clicked {
+  color: #137347;
+}
+
+.trakk-compose-toggle {
+  align-items: center;
+  color: #315043;
+  display: inline-flex;
+  font: 12px Arial, sans-serif;
+  gap: 5px;
+  margin: 5px 8px;
+  user-select: none;
+}
+
+.trakk-compose-toggle input { accent-color: #1f7a55; }

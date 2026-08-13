@@ -1,0 +1,5 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Trakk setup</title></head>
+  <body><main><div class="brand"><span>T</span>trakk</div><p>Connect this browser to your private dashboard.</p><form id="settings"><label>Web app URL<input id="appUrl" type="url" required placeholder="https://trakk.example.com" /></label><label>Extension secret<input id="extensionSecret" type="password" required placeholder="Shared secret from webapp" /></label><label>InboxSDK app ID<input id="inboxSdkAppId" required placeholder="sdk_your_registered_app_id" /></label><p id="notice" role="status"></p><button>Save connection</button></form><small>Stored locally in this browser. Never share the extension secret.</small></main><script type="module" src="./main.ts"></script></body>
+</html>
