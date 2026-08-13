@@ -1,7 +1,9 @@
 /** Gmail DOM selectors live here so Gmail UI changes have one repair point. */
 
-const THREAD_ROW = "tr[role='main'] tr, [role='main'] [data-thread-id]"; // Rows in Gmail's conversation list.
-const THREAD_SUBJECT = "[data-thread-id] span, .bog"; // Best-effort subject text inside a conversation row.
+const THREAD_ROW = "tr.zA"; // Each conversation row in Gmail's message list views (Sent, Inbox, etc).
+const THREAD_ID_ATTR = "[data-legacy-thread-id]"; // Nested element carrying the real Gmail thread ID as a plain hex string (matches what the backend stores).
+const RECIPIENT_CELL = ".yW"; // Visible "To: <name>" text in Sent/Drafts row views — where the badge is anchored, matching the reference UI (checkmark before the recipient).
+const SUBJECT_SPAN = ".bog"; // Subject text span; fallback anchor when a row has no recipient cell (e.g. Inbox rows), and used for display text.
 const COMPOSE_TOOLBAR = ".aDh, [role='toolbar']"; // Formatting/action toolbar inside an active compose window.
 const COMPOSE_BODY = "[aria-label='Message Body']"; // Gmail editable message body.
 
@@ -10,11 +12,15 @@ export function getThreadRows(root: ParentNode = document): HTMLElement[] {
 }
 
 export function threadIdForRow(row: HTMLElement): string | null {
-  return row.dataset.threadId ?? row.getAttribute("data-legacy-thread-id") ?? null;
+  return row.querySelector<HTMLElement>(THREAD_ID_ATTR)?.getAttribute("data-legacy-thread-id") ?? null;
+}
+
+export function getSubjectElement(row: HTMLElement): HTMLElement | null {
+  return row.querySelector<HTMLElement>(RECIPIENT_CELL) ?? row.querySelector<HTMLElement>(SUBJECT_SPAN);
 }
 
 export function subjectForRow(row: HTMLElement): string {
-  return row.querySelector<HTMLElement>(THREAD_SUBJECT)?.innerText.trim() ?? "Tracked email";
+  return row.querySelector<HTMLElement>(SUBJECT_SPAN)?.textContent?.trim() ?? "Tracked email";
 }
 
 export function findComposeToolbar(root: ParentNode): HTMLElement | null {

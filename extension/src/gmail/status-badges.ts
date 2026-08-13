@@ -1,6 +1,6 @@
 import { getThreadStates } from "../api";
 import type { ThreadState, TrakkConfig } from "../types";
-import { getThreadRows, subjectForRow, threadIdForRow } from "./selectors";
+import { getThreadRows, getSubjectElement, subjectForRow, threadIdForRow } from "./selectors";
 
 const BADGE_CLASS = "trakk-status-badge";
 
@@ -22,7 +22,13 @@ function paint(row: HTMLElement, state: ThreadState) {
   if (!state.tracked) { badge?.remove(); return; }
   const label = labelFor(state);
   if (!label) { badge?.remove(); return; }
-  if (!badge) { badge = document.createElement("span"); badge.className = BADGE_CLASS; row.append(badge); }
+  if (!badge) {
+    badge = document.createElement("span");
+    badge.className = BADGE_CLASS;
+    const subjectEl = getSubjectElement(row);
+    if (subjectEl?.parentElement) subjectEl.parentElement.insertBefore(badge, subjectEl);
+    else row.prepend(badge);
+  }
   badge.classList.toggle("trakk-status-badge--clicked", state.clicks > 0);
   badge.textContent = label; badge.title = tooltipFor(state); badge.setAttribute("aria-label", `${subjectForRow(row)}: ${tooltipFor(state)}`);
 }
