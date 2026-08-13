@@ -16,13 +16,23 @@ export async function GET(
     const ip = req.headers.get("x-forwarded-for") ?? "unknown";
     const ua = req.headers.get("user-agent") ?? "unknown";
 
-    const supabase = getSupabaseAdmin();
-    await supabase.from("events").insert({
-      email_id: emailId,
-      type: "open",
-      ip_hash: sha256Hex(ip),
-      ua_hash: sha256Hex(ua),
-    });
+    try {
+      const supabase = getSupabaseAdmin();
+      supabase
+        .from("events")
+        .insert({
+          email_id: emailId,
+          type: "open",
+          ip_hash: sha256Hex(ip),
+          ua_hash: sha256Hex(ua),
+        })
+        .then(
+          () => {},
+          () => {},
+        );
+    } catch {
+      // Never let logging failures affect the pixel response.
+    }
   }
 
   return new NextResponse(new Uint8Array(PIXEL_GIF), { headers: PIXEL_HEADERS });
