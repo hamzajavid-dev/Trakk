@@ -27,7 +27,7 @@ Chrome Extension (unpacked)          Next.js App (webapp/) + Supabase (Postgres)
 ```
 
 Two folders in this repo:
-- `webapp/` — Next.js 15 (App Router), Supabase (Postgres + Auth), deployed to Vercel.
+- `webapp/` — Next.js 16 (App Router), Supabase (Postgres + Auth), deployed to Vercel.
 - `extension/` — Chrome MV3 extension, TypeScript, Vite + CRXJS, @inboxsdk/core.
 
 There is no Cloudflare Worker in this design. The original brief used Workers to sit
