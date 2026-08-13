@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyEmailToken } from "@/lib/tokens";
 import { isSafeRedirectUrl, verifyLinkSig } from "@/lib/linkSig";
-import { sha256Hex } from "@/lib/hash";
+import { requireEnv } from "@/lib/env";
+import { logEvent } from "@/lib/events";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 
 export async function GET(
@@ -9,8 +10,8 @@ export async function GET(
   { params }: { params: Promise<{ token: string; i: string }> },
 ) {
   const { token, i } = await params;
-  const tokenSecret = process.env.TOKEN_SECRET!;
-  const linkSigSecret = process.env.LINK_SIG_SECRET!;
+  const tokenSecret = requireEnv("TOKEN_SECRET");
+  const linkSigSecret = requireEnv("LINK_SIG_SECRET");
 
   const emailId = verifyEmailToken(token, tokenSecret);
   const idx = Number.parseInt(i, 10);
@@ -36,26 +37,7 @@ export async function GET(
     return NextResponse.json({ error: "not found" }, { status: 404 });
   }
 
-  const ip = req.headers.get("x-forwarded-for") ?? "unknown";
-  const ua = req.headers.get("user-agent") ?? "unknown";
-
-  try {
-    supabase
-      .from("events")
-      .insert({
-        email_id: emailId,
-        link_id: link.id,
-        type: "click",
-        ip_hash: sha256Hex(ip),
-        ua_hash: sha256Hex(ua),
-      })
-      .then(
-        () => {},
-        () => {},
-      );
-  } catch {
-    // Never let logging failures affect the redirect.
-  }
+  logEvent(req, { emailId, linkId: link.id, type: "click" });
 
   return NextResponse.redirect(link.url, { status: 302 });
 }

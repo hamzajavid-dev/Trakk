@@ -4,6 +4,7 @@ import { createEmailToken } from "@/lib/tokens";
 import { hashWithSecret } from "@/lib/hash";
 import { isSafeRedirectUrl, signLink } from "@/lib/linkSig";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { requireEnv } from "@/lib/env";
 
 interface SentBody {
   threadId: string;
@@ -19,25 +20,33 @@ function isAuthorized(req: NextRequest): boolean {
 }
 
 export async function POST(req: NextRequest) {
-  if (!process.env.EXTENSION_SHARED_SECRET) {
-    throw new Error("EXTENSION_SHARED_SECRET must be set");
-  }
-  if (!process.env.TOKEN_SECRET) {
-    throw new Error("TOKEN_SECRET must be set");
-  }
-  if (!process.env.LINK_SIG_SECRET) {
-    throw new Error("LINK_SIG_SECRET must be set");
-  }
-  if (!process.env.APP_BASE_URL) {
-    throw new Error("APP_BASE_URL must be set");
-  }
+  requireEnv("EXTENSION_SHARED_SECRET");
+  const tokenSecret = requireEnv("TOKEN_SECRET");
+  const linkSigSecret = requireEnv("LINK_SIG_SECRET");
+  const baseUrl = requireEnv("APP_BASE_URL");
+
   if (!isAuthorized(req)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  const body = (await req.json()) as SentBody;
+  let body: SentBody;
+  try {
+    body = (await req.json()) as SentBody;
+  } catch {
+    return NextResponse.json({ error: "invalid JSON body" }, { status: 400 });
+  }
+
   if (!body.threadId || !body.subject || !Array.isArray(body.links)) {
     return NextResponse.json({ error: "invalid body" }, { status: 400 });
+  }
+  if (
+    body.recipientCount !== undefined &&
+    !(Number.isInteger(body.recipientCount) && body.recipientCount > 0)
+  ) {
+    return NextResponse.json(
+      { error: "recipientCount must be a positive integer" },
+      { status: 400 },
+    );
   }
   const badLink = body.links.find((url) => !isSafeRedirectUrl(url));
   if (badLink) {
@@ -46,10 +55,6 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     );
   }
-
-  const tokenSecret = process.env.TOKEN_SECRET!;
-  const linkSigSecret = process.env.LINK_SIG_SECRET!;
-  const baseUrl = process.env.APP_BASE_URL!;
 
   const emailId = randomUUID();
   const token = createEmailToken(emailId, tokenSecret);
