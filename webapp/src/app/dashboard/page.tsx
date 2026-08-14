@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getDashboardSnapshot, summariseEmails } from "@/lib/dashboardData";
+import { getDashboardSnapshot, isConfirmedClick, isConfirmedOpen, summariseEmails } from "@/lib/dashboardData";
 
 function relativeTime(value: string) { const minutes = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 60000)); return minutes < 1 ? "just now" : minutes < 60 ? `${minutes}m ago` : minutes < 1440 ? `${Math.floor(minutes / 60)}h ago` : `${Math.floor(minutes / 1440)}d ago`; }
 function confidence(value: number) { return value >= 85 ? "High confidence" : value >= 55 ? "Likely" : "Low confidence"; }
@@ -7,8 +7,9 @@ function confidence(value: number) { return value >= 85 ? "High confidence" : va
 export default async function DashboardPage() {
   const { emails, events, links } = await getDashboardSnapshot();
   const summaries = summariseEmails(emails, events);
-  const opens = events.filter((event) => event.type === "open");
-  const clicks = events.filter((event) => event.type === "click");
+  const opens = events.filter(isConfirmedOpen);
+  const clicks = events.filter(isConfirmedClick);
+  const confirmedFeed = events.filter((event) => isConfirmedOpen(event) || isConfirmedClick(event));
   const clickCounts = new Map<string, number>();
   clicks.forEach((event) => { if (event.link_id) clickCounts.set(event.link_id, (clickCounts.get(event.link_id) ?? 0) + 1); });
   const topLinks = links.map((link) => ({ ...link, clicks: clickCounts.get(link.id) ?? 0 })).filter((link) => link.clicks > 0).sort((a, b) => b.clicks - a.clicks).slice(0, 4);
@@ -24,7 +25,7 @@ export default async function DashboardPage() {
     </section>
     <section className="dashboard-grid">
       <article className="panel activity-panel"><div className="panel-heading"><div><p className="eyebrow">Right now</p><h2>Latest activity</h2></div><span className="status-pill">● Live</span></div>
-        <div className="activity-list">{events.slice(0, 6).map((event) => { const email = emails.find((item) => item.id === event.email_id); return <Link href={`/dashboard/sent/${event.email_id}`} className="activity-item" key={event.id}><span className={`event-dot event-${event.type}`} /> <div><strong>{event.type === "click" ? "Link clicked" : event.type === "open" ? "Email opened" : "Preview detected"}</strong><p>{email?.subject ?? "Tracked email"}</p></div><div className="activity-meta"><span>{confidence(event.confidence)}</span><time>{relativeTime(event.at)}</time></div></Link>; })}{events.length === 0 && <div className="empty-state"><span>◌</span><p>Activity will appear here as recipients engage with your email.</p></div>}</div>
+        <div className="activity-list">{confirmedFeed.slice(0, 6).map((event) => { const email = emails.find((item) => item.id === event.email_id); return <Link href={`/dashboard/sent/${event.email_id}`} className="activity-item" key={event.id}><span className={`event-dot event-${event.type}`} /> <div><strong>{event.type === "click" ? "Link clicked" : event.type === "open" ? "Email opened" : "Preview detected"}</strong><p>{email?.subject ?? "Tracked email"}</p></div><div className="activity-meta"><span>{confidence(event.confidence)}</span><time>{relativeTime(event.at)}</time></div></Link>; })}{events.length === 0 && <div className="empty-state"><span>◌</span><p>Activity will appear here as recipients engage with your email.</p></div>}</div>
       </article>
       <article className="panel chart-panel"><div className="panel-heading"><div><p className="eyebrow">Last 7 days</p><h2>Opens over time</h2></div><strong>{opens.length}</strong></div><div className="bar-chart">{days.map((day, i) => <div className="bar-column" key={`${day.label}-${i}`}><span className="bar-value">{day.total || ""}</span><i style={{ height: `${Math.max(8, (day.total / maxDay) * 100)}%` }} /><small>{day.label}</small></div>)}</div></article>
     </section>

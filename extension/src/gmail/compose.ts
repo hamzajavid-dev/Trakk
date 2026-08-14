@@ -23,6 +23,49 @@ function rewriteLinks(body: HTMLElement, trackingUrls: string[]) {
   anchors.forEach((anchor, index) => { const replacement = trackingUrls[index]; if (replacement) anchor.href = replacement; });
 }
 
+const BARE_URL_PATTERN = /https?:\/\/[^\s<>"')]+/g;
+
+function splitTrailingPunctuation(url: string): { url: string; trail: string } {
+  const trailing = url.match(/[.,!?;:)\]}]+$/);
+  return trailing ? { url: url.slice(0, -trailing[0].length), trail: trailing[0] } : { url, trail: "" };
+}
+
+// Gmail only auto-linkifies plain-text URLs when it renders a message for
+// reading, not necessarily by presend time — so a bare URL can leave compose
+// as plain text, invisible to the `a[href]` scan above, then become a live
+// (untracked) link once Gmail displays it. Wrapping bare URLs in real anchors
+// here, before that scan runs, closes that gap.
+function linkifyPlainTextUrls(root: HTMLElement) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode: (node) => (node.parentElement?.closest("a") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+  });
+  const textNodes: Text[] = [];
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) textNodes.push(node as Text);
+
+  for (const node of textNodes) {
+    const text = node.textContent ?? "";
+    BARE_URL_PATTERN.lastIndex = 0;
+    if (!BARE_URL_PATTERN.test(text)) continue;
+    BARE_URL_PATTERN.lastIndex = 0;
+
+    const fragment = document.createDocumentFragment();
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+    while ((match = BARE_URL_PATTERN.exec(text))) {
+      const { url, trail } = splitTrailingPunctuation(match[0]);
+      if (!url) continue;
+      fragment.append(text.slice(lastIndex, match.index));
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.textContent = url;
+      fragment.append(anchor, trail);
+      lastIndex = match.index + match[0].length;
+    }
+    fragment.append(text.slice(lastIndex));
+    node.replaceWith(fragment);
+  }
+}
+
 function injectPixel(body: HTMLElement, pixelUrl: string) {
   if (body.querySelector("img[data-trakk-pixel]")) return;
   const pixel = document.createElement("img");
@@ -56,6 +99,7 @@ export function registerComposeTracking(sdk: InboxSDK, config: TrakkConfig) {
       if (!enabledByCompose.get(view)) return { body };
       const documentBody = new DOMParser().parseFromString(body, "text/html").body;
       if (documentBody.querySelector("img[data-trakk-pixel]")) return { body };
+      linkifyPlainTextUrls(documentBody);
       const links = [...documentBody.querySelectorAll<HTMLAnchorElement>("a[href]")]
         .map((link) => link.href).filter((href) => /^https?:\/\//i.test(href));
       const threadId = view.getThreadID() || composeElement(view).dataset.threadId || crypto.randomUUID();

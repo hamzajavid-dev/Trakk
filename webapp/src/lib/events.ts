@@ -1,6 +1,6 @@
 import { after } from "next/server";
 import type { NextRequest } from "next/server";
-import { classifyOpen } from "./accuracy";
+import { classifyClient, classifyOpen, dedupeMatchesIp } from "./accuracy";
 import { sha256Hex } from "./hash";
 import { getSupabaseAdmin } from "./supabaseAdmin";
 
@@ -39,15 +39,19 @@ export function logEvent(
         : { type: "click" as const, isProxy: false, confidence: 100 };
 
       if (event.type === "open") {
-        const { data: duplicate } = await supabase
+        // Only dedupe against prior events of the SAME classified type — a
+        // delivery-time prefetch and a later genuine open are different
+        // things, and a prefetch must never suppress a real open that
+        // happens to land within the same rolling window.
+        let duplicateQuery = supabase
           .from("events")
           .select("id")
           .eq("email_id", event.emailId)
-          .eq("ip_hash", ipHash)
           .eq("ua_hash", uaHash)
-          .in("type", ["open", "prefetch"])
-          .gte("at", new Date(Date.now() - 180_000).toISOString())
-          .limit(1);
+          .eq("type", classified.type)
+          .gte("at", new Date(Date.now() - 180_000).toISOString());
+        if (dedupeMatchesIp(classified.isProxy)) duplicateQuery = duplicateQuery.eq("ip_hash", ipHash);
+        const { data: duplicate } = await duplicateQuery.limit(1);
         if ((duplicate?.length ?? 0) > 0) return;
       }
 
@@ -60,6 +64,7 @@ export function logEvent(
         is_proxy: classified.isProxy,
         is_self: isSelf,
         confidence: isSelf ? 0 : classified.confidence,
+        client: classifyClient(ua, classified.isProxy),
       });
     } catch (error) {
       console.error("Could not log tracking event", error);

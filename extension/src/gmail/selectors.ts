@@ -6,6 +6,8 @@ const RECIPIENT_CELL = ".yW"; // Visible "To: <name>" text in Sent/Drafts row vi
 const SUBJECT_SPAN = ".bog"; // Subject text span; fallback anchor when a row has no recipient cell (e.g. Inbox rows), and used for display text.
 const COMPOSE_TOOLBAR = ".aDh, [role='toolbar']"; // Formatting/action toolbar inside an active compose window.
 const COMPOSE_BODY = "[aria-label='Message Body']"; // Gmail editable message body.
+const SENT_NAV_LINK = "a[href*='#sent']"; // Left-sidebar "Sent" folder link — matched by its stable route hash, not a styling class.
+const SCHEDULED_NAV_LINK = "a[href*='#scheduled']"; // Left-sidebar "Scheduled" link — Gmail only renders this item at all when at least one send is queued.
 
 export function getThreadRows(root: ParentNode = document): HTMLElement[] {
   return [...root.querySelectorAll<HTMLElement>(THREAD_ROW)].filter((row) => Boolean(threadIdForRow(row)));
@@ -29,4 +31,12 @@ export function findComposeToolbar(root: ParentNode): HTMLElement | null {
 
 export function findComposeBody(root: ParentNode): HTMLElement | null {
   return root.querySelector<HTMLElement>(COMPOSE_BODY);
+}
+
+export function findSentNavLink(root: ParentNode = document): HTMLElement | null {
+  return root.querySelector<HTMLElement>(SENT_NAV_LINK);
+}
+
+export function findScheduledNavLink(root: ParentNode = document): HTMLElement | null {
+  return root.querySelector<HTMLElement>(SCHEDULED_NAV_LINK);
 }

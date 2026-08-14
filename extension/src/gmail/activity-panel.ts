@@ -1,6 +1,7 @@
 import type { InboxSDK } from "@inboxsdk/core";
 import { getRecentActivity } from "../api";
 import type { ActivityEvent, TrakkConfig } from "../types";
+import { findScheduledNavLink } from "./selectors";
 
 // Small brand mark + double-check glyph, inlined as a data URI so the
 // toolbar button needs no bundled asset or manifest icon entry.
@@ -36,12 +37,27 @@ function renderList(container: HTMLElement, activity: ActivityEvent[]) {
     .join("");
 }
 
+// Trakk doesn't run its own scheduler — Gmail's native "Schedule send" already
+// works with Trakk's tracking (the presend hook fires at actual transmit
+// time, scheduled or not). This just surfaces the count Gmail itself already
+// renders next to its "Scheduled" nav item, with a link into Gmail's own list,
+// rather than duplicating that fragile detail ourselves.
+function scheduledSummaryHtml(): string {
+  const link = findScheduledNavLink();
+  if (!link) return "";
+  const count = link.textContent?.match(/(\d+)\s*$/)?.[1];
+  const label = count ? `${count} email${count === "1" ? "" : "s"} scheduled` : "You have emails scheduled";
+  const scheduledUrl = `${location.origin}${location.pathname}#scheduled`;
+  return `<a class="trakk-scheduled-row" href="${scheduledUrl}"><span class="trakk-scheduled-dot"></span><span>${label}</span><span class="trakk-scheduled-arrow">→</span></a>`;
+}
+
 function buildPanel(config: TrakkConfig) {
   const panel = document.createElement("div");
   panel.className = "trakk-activity-panel";
   panel.innerHTML =
     '<div class="trakk-activity-header"><span class="trakk-activity-brand"><i>T</i>trakk</span>' +
     `<a href="${config.appUrl}/dashboard" target="_blank" rel="noreferrer">Open dashboard →</a></div>` +
+    scheduledSummaryHtml() +
     '<div class="trakk-activity-list trakk-activity-loading">Loading…</div>';
   return panel;
 }
