@@ -5,6 +5,9 @@ const appUrl = document.querySelector<HTMLInputElement>("#appUrl")!;
 const extensionSecret = document.querySelector<HTMLInputElement>("#extensionSecret")!;
 const inboxSdkAppId = document.querySelector<HTMLInputElement>("#inboxSdkAppId")!;
 const notice = document.querySelector<HTMLParagraphElement>("#notice")!;
+const brandMark = document.querySelector<HTMLImageElement>("#brandMark")!;
+
+brandMark.src = chrome.runtime.getURL("icons/icon128.png");
 
 async function load() {
   const saved = await chrome.storage.local.get(["appUrl", "extensionSecret", "inboxSdkAppId"]);

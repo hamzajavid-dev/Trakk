@@ -4,7 +4,7 @@ import { getThreadRows, getSubjectElement, subjectForRow, threadIdForRow } from 
 import { SINGLE_CHECK_SVG, DOUBLE_CHECK_SVG } from "./icons";
 
 const BADGE_CLASS = "trakk-status-badge";
-const REFRESH_INTERVAL_MS = 10_000;
+const REFRESH_INTERVAL_MS = 4_000;
 
 // Sent-but-unopened still gets a badge (single check) — previously a tracked
 // email with no opens yet showed nothing at all, which is indistinguishable

@@ -1,8 +1,8 @@
 .trakk-status-badge {
   align-items: center;
-  background: #eaf5ef;
+  background: #e2faf1;
   border-radius: 999px;
-  color: #4f8a70;
+  color: #147d5b;
   display: inline-flex;
   height: 18px;
   justify-content: center;
@@ -15,18 +15,18 @@
 }
 
 .trakk-status-badge--opened {
-  background: #dff3e6;
-  color: #1f7a55;
+  background: #ccf6e6;
+  color: #0b8960;
 }
 
 .trakk-status-badge--clicked {
-  background: #c9ecd2;
-  color: #14563c;
+  background: #b6f0db;
+  color: #076244;
 }
 
 .trakk-sent-nav-badge {
   align-items: center;
-  color: #1f7a55;
+  color: #0b8960;
   display: inline-flex;
   margin-left: 6px;
   vertical-align: middle;
@@ -38,7 +38,7 @@
 
 .trakk-compose-toggle {
   align-items: center;
-  color: #315043;
+  color: #173c31;
   display: inline-flex;
   font: 12px Arial, sans-serif;
   gap: 5px;
@@ -46,17 +46,19 @@
   user-select: none;
 }
 
-.trakk-compose-toggle input { accent-color: #1f7a55; }
+.trakk-compose-toggle input { accent-color: #21c990; }
 
 .trakk-activity-panel {
-  color: #17211d;
+  color: #172123;
   font-family: Arial, sans-serif;
   width: 320px;
 }
 
 .trakk-activity-header {
   align-items: center;
-  border-bottom: 1px solid #e4ece6;
+  background: linear-gradient(105deg,#172123,#1e4237);
+  border-bottom: 0;
+  color: white;
   display: flex;
   justify-content: space-between;
   padding: 14px 16px;
@@ -67,26 +69,19 @@
   display: inline-flex;
   font-size: 15px;
   font-weight: 800;
-  gap: 7px;
+  gap: 8px;
   letter-spacing: -0.5px;
 }
 
-.trakk-activity-brand i {
-  align-items: center;
-  background: #17211d;
+.trakk-activity-brand img {
   border-radius: 6px;
-  color: #b8f86d;
-  display: inline-flex;
-  font-family: monospace;
-  font-size: 11px;
-  font-style: normal;
-  height: 20px;
-  justify-content: center;
-  width: 20px;
+  display: block;
+  height: 22px;
+  width: 22px;
 }
 
 .trakk-activity-header a {
-  color: #1f7a55;
+  color: #8ef2d6;
   font-size: 11px;
   font-weight: 700;
   text-decoration: none;
@@ -94,9 +89,9 @@
 
 .trakk-scheduled-row {
   align-items: center;
-  background: #f6faf7;
-  border-bottom: 1px solid #e4ece6;
-  color: #17211d;
+  background: #f2faf7;
+  border-bottom: 1px solid #dcece5;
+  color: #173c31;
   display: flex;
   font-size: 12px;
   font-weight: 700;
@@ -106,7 +101,8 @@
 }
 
 .trakk-scheduled-dot {
-  background: #1f7a55;
+  background: #21c990;
+  box-shadow: 0 0 0 3px #d7f6e9;
   border-radius: 50%;
   height: 7px;
   width: 7px;
@@ -117,7 +113,7 @@
 }
 
 .trakk-scheduled-arrow {
-  color: #1f7a55;
+  color: #0b8960;
 }
 
 .trakk-activity-list {
@@ -127,7 +123,7 @@
 
 .trakk-activity-loading,
 .trakk-activity-empty {
-  color: #718078;
+  color: #657873;
   font-size: 12px;
   line-height: 1.5;
   padding: 30px 16px;
@@ -136,7 +132,7 @@
 
 .trakk-activity-item {
   align-items: flex-start;
-  border-top: 1px solid #f1f5f2;
+  border-top: 1px solid #edf4f0;
   display: grid;
   gap: 10px;
   grid-template-columns: 8px 1fr auto;
@@ -155,13 +151,13 @@
 }
 
 .trakk-activity-dot--open {
-  background: #1f7a55;
-  box-shadow: 0 0 0 3px #e2f2e7;
+  background: #21c990;
+  box-shadow: 0 0 0 3px #dff7ed;
 }
 
 .trakk-activity-dot--click {
-  background: #e27e50;
-  box-shadow: 0 0 0 3px #ffe9df;
+  background: #f08a58;
+  box-shadow: 0 0 0 3px #fff0e8;
 }
 
 .trakk-activity-body strong {
@@ -170,7 +166,7 @@
 }
 
 .trakk-activity-body p {
-  color: #718078;
+  color: #657873;
   font-size: 11px;
   margin: 3px 0 0;
   max-width: 210px;
@@ -180,7 +176,7 @@
 }
 
 .trakk-activity-item time {
-  color: #9aa8a0;
+  color: #8b9c96;
   font-size: 10px;
   white-space: nowrap;
 }

@@ -3,18 +3,6 @@ import { getRecentActivity } from "../api";
 import type { ActivityEvent, TrakkConfig } from "../types";
 import { findScheduledNavLink } from "./selectors";
 
-// Small brand mark + double-check glyph, inlined as a data URI so the
-// toolbar button needs no bundled asset or manifest icon entry.
-const TOOLBAR_ICON =
-  "data:image/svg+xml;utf8," +
-  encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">' +
-      '<rect width="20" height="20" rx="5" fill="#17211d"/>' +
-      '<path d="M2.5 10.5L6 14L11 6" stroke="#b8f86d" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>' +
-      '<path d="M8.5 10.5L12 14L17 6" stroke="#b8f86d" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>' +
-      "</svg>",
-  );
-
 function relativeTime(value: string) {
   const minutes = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 60000));
   if (minutes < 1) return "just now";
@@ -54,8 +42,9 @@ function scheduledSummaryHtml(): string {
 function buildPanel(config: TrakkConfig) {
   const panel = document.createElement("div");
   panel.className = "trakk-activity-panel";
+  const markUrl = chrome.runtime.getURL("icons/icon128.png");
   panel.innerHTML =
-    '<div class="trakk-activity-header"><span class="trakk-activity-brand"><i>T</i>trakk</span>' +
+    `<div class="trakk-activity-header"><span class="trakk-activity-brand"><img src="${markUrl}" alt="" />trakk</span>` +
     `<a href="${config.appUrl}/dashboard" target="_blank" rel="noreferrer">Open dashboard →</a></div>` +
     scheduledSummaryHtml() +
     '<div class="trakk-activity-list trakk-activity-loading">Loading…</div>';
@@ -65,7 +54,7 @@ function buildPanel(config: TrakkConfig) {
 export function registerActivityPanel(sdk: InboxSDK, config: TrakkConfig) {
   sdk.Toolbars.addToolbarButtonForApp({
     title: "Trakk",
-    iconUrl: TOOLBAR_ICON,
+    iconUrl: chrome.runtime.getURL("icons/icon32.png"),
     onClick: ({ dropdown }) => {
       if (!dropdown) return;
       const panel = buildPanel(config);

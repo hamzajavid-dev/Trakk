@@ -4,7 +4,7 @@ export default function LoginPage() {
   return (
     <main className="auth-page">
       <div className="auth-panel">
-        <a className="brand" href="/"><span className="brand-mark">T</span><span>trakk</span></a>
+        <a className="brand" href="/"><img src="/trakk-logo.png" alt="Trakk" className="brand-logo" /></a>
         <div className="auth-copy"><p className="eyebrow">Private dashboard</p><h1>Welcome back.</h1><p>Sign in with the owner account to see your email activity.</p></div>
         <LoginForm />
       </div>

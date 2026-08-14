@@ -5,8 +5,7 @@ export default function Home() {
     <main className="marketing-shell">
       <nav className="marketing-nav">
         <Link href="/" className="brand" aria-label="Trakk home">
-          <span className="brand-mark">T</span>
-          <span>trakk</span>
+          <img src="/trakk-logo.png" alt="Trakk" className="brand-logo" />
         </Link>
         <Link href="/login" className="button button-secondary">Owner sign in</Link>
       </nav>
