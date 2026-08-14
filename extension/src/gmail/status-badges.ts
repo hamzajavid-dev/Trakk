@@ -4,9 +4,14 @@ import { getThreadRows, getSubjectElement, subjectForRow, threadIdForRow } from 
 
 const BADGE_CLASS = "trakk-status-badge";
 
-function labelFor(state: ThreadState) {
-  if (state.clicks > 0) return "✓✓";
-  if (state.opens > 0) return "✓";
+// A single check for "opened" and an overlapping double check for "clicked" —
+// same viewBox so the two states swap in place without the badge reflowing.
+const SINGLE_CHECK_SVG = '<svg viewBox="0 0 20 14" width="16" height="12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 7.5L7 12.5L18 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const DOUBLE_CHECK_SVG = '<svg viewBox="0 0 20 14" width="16" height="12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M-2 7.5L3 12.5L14 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 7.5L11 12.5L22 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function iconFor(state: ThreadState) {
+  if (state.clicks > 0) return DOUBLE_CHECK_SVG;
+  if (state.opens > 0) return SINGLE_CHECK_SVG;
   return "";
 }
 function tooltipFor(state: ThreadState) {
@@ -20,8 +25,8 @@ function tooltipFor(state: ThreadState) {
 function paint(row: HTMLElement, state: ThreadState) {
   let badge = row.querySelector<HTMLElement>(`.${BADGE_CLASS}`);
   if (!state.tracked) { badge?.remove(); return; }
-  const label = labelFor(state);
-  if (!label) { badge?.remove(); return; }
+  const icon = iconFor(state);
+  if (!icon) { badge?.remove(); return; }
   if (!badge) {
     badge = document.createElement("span");
     badge.className = BADGE_CLASS;
@@ -30,7 +35,7 @@ function paint(row: HTMLElement, state: ThreadState) {
     else row.prepend(badge);
   }
   badge.classList.toggle("trakk-status-badge--clicked", state.clicks > 0);
-  badge.textContent = label; badge.title = tooltipFor(state); badge.setAttribute("aria-label", `${subjectForRow(row)}: ${tooltipFor(state)}`);
+  badge.innerHTML = icon; badge.title = tooltipFor(state); badge.setAttribute("aria-label", `${subjectForRow(row)}: ${tooltipFor(state)}`);
 }
 
 export async function refreshThreadBadges(config: TrakkConfig) {

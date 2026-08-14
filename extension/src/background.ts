@@ -1,5 +1,5 @@
 import "@inboxsdk/core/background";
-import { getConfig, type SentRegistration, type ThreadState, type TrakkConfig } from "./types";
+import { getConfig, type ActivityEvent, type SentRegistration, type ThreadState, type TrakkConfig } from "./types";
 
 const HEARTBEAT_ALARM = "trakk-heartbeat";
 const SELF_OPEN_RULES = [9101, 9102];
@@ -51,6 +51,11 @@ async function updateThreadId(config: TrakkConfig, emailId: string, threadId: st
   return responseJson<{ ok: true }>(response, "Thread ID update");
 }
 
+async function getActivity(config: TrakkConfig) {
+  const response = await fetch(`${config.appUrl}/api/activity`, { headers: authorization(config) });
+  return responseJson<{ activity: ActivityEvent[] }>(response, "Activity lookup");
+}
+
 chrome.runtime.onMessage.addListener((message: unknown, _sender, sendResponse) => {
   if (!message || typeof message !== "object" || !("type" in message)) return;
   const request = message as { type: string; config?: TrakkConfig; payload?: { threadId: string; subject: string; recipientCount: number; links: string[] }; threadIds?: string[]; emailId?: string; threadId?: string };
@@ -60,7 +65,9 @@ chrome.runtime.onMessage.addListener((message: unknown, _sender, sendResponse) =
       ? getStatus(request.config, request.threadIds)
       : request.type === "trakk-update-thread-id" && request.config && request.emailId && request.threadId
         ? updateThreadId(request.config, request.emailId, request.threadId)
-        : null;
+        : request.type === "trakk-get-activity" && request.config
+          ? getActivity(request.config)
+          : null;
   if (!task) return;
   void task.then((data) => sendResponse({ ok: true, data })).catch((error: unknown) => {
     const text = error instanceof Error ? error.message : "Trakk request failed.";

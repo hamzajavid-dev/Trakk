@@ -3,6 +3,17 @@
 Date: 2026-08-14
 Status: Approved
 
+## Implementation status (2026-08-14)
+
+All four planned source-code phases are implemented locally: Next.js/Supabase
+tracking endpoints, the accuracy layer, the owner dashboard, and the separate MV3
+Chrome extension. Both projects build successfully. The only remaining acceptance
+gate is real-world deployment and Gmail verification: deploy the webapp over HTTPS,
+apply the accuracy migration, configure the single owner Auth account, load
+`extension/dist` unpacked, and confirm a separate recipient open changes the Gmail
+badge from ✓ to ✓✓ and appears in the dashboard. See `PLAN.md` and
+`extension/README.md` for the exact steps.
+
 ## Purpose
 
 A single-user tool that tracks when the user's sent Gmail emails are opened and when

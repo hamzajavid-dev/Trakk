@@ -341,7 +341,7 @@ functions like `tokens.ts`/`linkSig.ts`/`hash.ts`).
 
 ---
 
-## 5. Session 3 — NOT STARTED — Dashboard
+## 5. Session 3 — IMPLEMENTED LOCALLY — Dashboard
 
 Depends on Session 2 being done first (the dashboard displays confidence-scored,
 deduped, prefetch-filtered data — building it against raw undeduped data now would
@@ -372,16 +372,30 @@ mean redoing it).
   above) must finally get wired up** — the toggle is pointless UI theater if no
   route handler actually checks the flag.
 
-### Also needed (implied, not yet built)
+### Implementation completed in this session
 
-- `GET /api/status` — batch thread-state endpoint (mentioned in the architecture
-  diagram in the spec, used by the extension for in-Gmail ✓/✓✓ display) — this could
-  arguably be built in Session 3 or Session 4, whichever comes first and needs it;
-  not yet assigned to a specific session in detail.
+- Replaced the starter Next.js screen with a polished Trakk landing page, owner
+  login, and responsive dashboard visual system.
+- Added Supabase Auth email/password login that only permits the configured
+  `DASHBOARD_OWNER_EMAIL`; its access token is held in an eight-hour HTTP-only,
+  same-site cookie. Dashboard data remains server-rendered through the existing
+  service-role client, so no database key is exposed to the browser.
+- Added `/dashboard` overview: live activity feed, performance counts, a compact
+  seven-day opens chart, recent sends, and top-clicked-link breakdown.
+- Added `/dashboard/sent`: search, status filters, and sorting for every tracked
+  email; and `/dashboard/sent/[id]`: confidence-labelled timeline, per-link clicks,
+  tracking control, and individually deletable raw events.
+- Added owner-authorised dashboard routes for login/logout, tracking toggles, and
+  raw-event deletion. Session 2 already checks `tracking_enabled` before logging,
+  so the toggle is functional rather than a visual-only setting.
+- `npm run build` passes on Next.js 16.3.0. Before dashboard login can be exercised
+  against Supabase, add `SUPABASE_ANON_KEY` and `DASHBOARD_OWNER_EMAIL` to the
+  gitignored `webapp/.env.local` (documented in `.env.local.example`) and create
+  that one email/password user in Supabase Auth.
 
 ---
 
-## 6. Session 4 — NOT STARTED — Chrome Extension
+## 6. Session 4 — IMPLEMENTED LOCALLY — Chrome Extension
 
 The last piece. Depends on Session 1's `/api/sent` contract (already stable and
 tested) and ideally Session 2's accuracy work (so the extension isn't shipping
@@ -418,23 +432,39 @@ Send a normal email from Gmail (no special steps, no curl, no test harness) and
 watch it visibly turn into ✓✓ inside the Gmail UI once opened. This is the first
 point where the whole system is used exactly the way it'll be used day-to-day.
 
+### Implementation completed in this session
+
+- Added the separate `extension/` Vite + CRXJS Manifest V3 project with TypeScript,
+  InboxSDK, a Chrome settings popup, and a production `npm run build` output at
+  `extension/dist` for Chrome's **Load unpacked** flow.
+- Added the InboxSDK compose presend handler: it registers the Gmail thread through
+  `/api/sent`, rewrites HTTP(S) links to signed tracking URLs, injects the tracking
+  pixel, and adds a compose-local **Track with Trakk** checkbox.
+- Added a Gmail `MutationObserver` thread-list integration that batches up to 100
+  Gmail thread IDs through the new extension-authorised `GET /api/status` API and
+  shows ✓ for a tracked message or ✓✓ after a confirmed open with a useful hover
+  summary.
+- Added the heartbeat alarm and dynamic declarative-net-request rules that redirect
+  owner-view tracking pixels and Gmail proxy pixel fetches to `/api/noop`.
+- Kept every Gmail selector in `extension/src/gmail/selectors.ts`; the extension
+  setup, Chrome load instructions, and literal real-Gmail acceptance test are in
+  `extension/README.md`.
+- `npm run build` passes for both `webapp/` and `extension/`. The final live gate is
+  intentionally manual: deploy the webapp over HTTPS, apply migration `0002`, create
+  the configured owner, load `extension/dist`, send to a separate mailbox, and verify
+  the dashboard plus ✓→✓✓ transition. This needs real Gmail and deployment access,
+  so it cannot be asserted from the local workspace.
+
 ---
 
-## 7. Recommended order when resuming
+## 7. Remaining real-world gate
 
-1. **First**, decide whether to fold Task 10's real-email gate into the start of
-   Session 2 (recommended — see Session 1's parked items above) or knock it out on
-   its own first via a Vercel deploy.
-2. **Session 2** (accuracy layer) — the highest-value remaining work; the tool is
-   not trustworthy without it. Start with `superpowers:brainstorming` (there's one
-   real open design question: how/where to store extension heartbeat IPs for
-   self-open detection), then `superpowers:writing-plans`, then
-   `superpowers:subagent-driven-development` to execute — same process used for
-   Session 1, which worked well and caught several real bugs before they shipped.
-3. **Session 3** (dashboard) — straightforward once Session 2's data is trustworthy.
-4. **Session 4** (extension) — the part the user actually interacts with day-to-day;
-   naturally last since everything else needs to exist first for it to have
-   something to talk to.
+All planned source code is implemented locally. The remaining work is deployment and
+manual real-Gmail verification: apply `0002_accuracy_layer.sql`, configure the webapp
+environment (including Supabase dashboard Auth), deploy with a public HTTPS
+`APP_BASE_URL`, then load `extension/dist` and perform the verification steps in
+`extension/README.md`. Do not mark that gate passed until an actual recipient open
+appears in the dashboard and the corresponding Gmail row changes from ✓ to ✓✓.
 
 ## 8. Process notes for whoever resumes this (probably future-you, Claude)
 

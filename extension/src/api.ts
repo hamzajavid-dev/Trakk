@@ -1,4 +1,4 @@
-import type { SentRegistration, ThreadState, TrakkConfig } from "./types";
+import type { ActivityEvent, SentRegistration, ThreadState, TrakkConfig } from "./types";
 
 type BackgroundResponse<T> = { ok: true; data: T } | { ok: false; error: string };
 
@@ -21,4 +21,8 @@ export async function getThreadStates(config: TrakkConfig, threadIds: string[]) 
 
 export async function updateEmailThreadId(config: TrakkConfig, emailId: string, threadId: string): Promise<void> {
   await requestBackground<{ ok: true }>({ type: "trakk-update-thread-id", config, emailId, threadId });
+}
+
+export async function getRecentActivity(config: TrakkConfig) {
+  return requestBackground<{ activity: ActivityEvent[] }>({ type: "trakk-get-activity", config });
 }

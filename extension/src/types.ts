@@ -15,6 +15,15 @@ export type SentRegistration = {
   links: Array<{ idx: number; url: string; trackingUrl: string }>;
 };
 
+export type ActivityEvent = {
+  id: string;
+  emailId: string;
+  type: "open" | "click";
+  subject: string;
+  at: string;
+  confidence: number;
+};
+
 export function cleanAppUrl(value: string) {
   return value.trim().replace(/\/+$/, "");
 }

@@ -35,6 +35,7 @@ export interface EmailSummary extends TrackedEmail {
   opens: number;
   clicks: number;
   latestActivity: string | null;
+  lastOpenAt: string | null;
 }
 
 function activityAt(events: DashboardEvent[]) {
@@ -60,6 +61,7 @@ export function summariseEmails(emails: TrackedEmail[], events: DashboardEvent[]
         opens: emailEvents.filter((event) => event.type === "open").length,
         clicks: emailEvents.filter((event) => event.type === "click").length,
         latestActivity: activityAt(emailEvents),
+        lastOpenAt: activityAt(emailEvents.filter((event) => event.type === "open")),
       };
     })
     .sort((a, b) => (b.latestActivity ?? b.sent_at).localeCompare(a.latestActivity ?? a.sent_at));
