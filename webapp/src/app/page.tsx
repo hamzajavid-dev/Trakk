@@ -21,7 +21,7 @@ export default function Home() {
       </section>
 
       <section className="signal-card" aria-label="Tracking dashboard preview">
-        <div className="signal-topline"><span>Live activity</span><span className="status-pill">● Updating</span></div>
+        <div className="signal-topline"><span>Live activity</span><span className="status-pill"><i className="pulse-dot" /> Updating</span></div>
         <div className="signal-grid">
           <div><span className="metric-label">Open rate</span><strong>64<span>%</span></strong><small>↑ 12% this week</small></div>
           <div><span className="metric-label">Link clicks</span><strong>38</strong><small>Across 12 conversations</small></div>
